@@ -17,20 +17,21 @@ npm i puppe
 ### Puppe:
 
 ```js
-const puppe = require("puppe");
+const puppe = require("../src/puppe");
 
 let p;
 (async () => {
+  const url = "https://www.example.com/";
   p = await puppe.launch({
-    launchOptions: {headless: false},
+    launchOptions: { headless: false },
     js: false,
     block: {
       requests: req => req.url() !== url,
       resources: ["stylesheet", "image"],
     },
   });
-  await p.goto("https://www.example.com");
-  console.log(await p.$("h2").text());
+  await p.goto(url);
+  console.log(await p.$("h1").text());
 })()
   .catch(err => console.error(err))
   .finally(() => p?.close());
@@ -44,7 +45,7 @@ const puppeteer = require("puppeteer");
 let browser;
 (async () => {
   const url = "https://www.example.com/";
-  browser = await puppeteer.launch({headless: false});
+  browser = await puppeteer.launch({ headless: false });
   const [page] = await browser.pages();
   await page.setJavaScriptEnabled(false);
   const ua =
@@ -62,11 +63,11 @@ let browser;
       req.continue();
     }
   });
-  await page.goto(url, {waitUntil: "domcontentloaded"});
+  await page.goto(url, { waitUntil: "domcontentloaded" });
   const el = await page.waitForSelector("h1");
-  console.log(await el.evaluate(el => el.textContent.trim()));
+  console.log(await el.evaluate((el) => el.textContent.trim()));
 })()
-  .catch(err => console.error(err))
+  .catch((err) => console.error(err))
   .finally(() => browser?.close());
 ```
 
@@ -74,7 +75,7 @@ let browser;
 
 - Less boilerplate than Puppeteer and Playwright
 - Enforces best practices for reliability and speed
-- Sensible, opinionated defaults tuned to web scraping:
+- Provides sensible, opinionated defaults tuned to web scraping:
   - Auto wait by default
   - Default "domcontentloaded" for speed
   - Default human user agent for anti-detection
@@ -94,6 +95,7 @@ let browser;
 ## Audience
 
 The target audience for Puppe includes:
+
 - Beginners to web scraping looking to avoid pitfalls and complexity in larger libraries like Puppeteer. (You should still probably work through a Puppeteer tutorial to understand the basics)
 - Experienced web scrapers who want to eliminate boilerplate, hide complexity, enforce best practices and use a lighter-weight tool designed for common case scraping tasks.
 
@@ -121,12 +123,14 @@ All operations auto-wait with `page.waitForSelector()` by default.
 - `p.frame(frameSelector).$(selector).click()`
 
 Approved pass-through wrappers (may not need?):
+
 - `p.screenshot(opts)` // opts passed through to page.screenshot(); TODO p.$().screenshot()?
 - `p.content()` --> simple wrapper
 
 //`p.restart()`/`p.configure()`//`relaunch()` (or just make it so `.launch()` relaunches the page on the same browser, if the browser is still open?)
 
 // alternate API:
+
 - `p.goto(url)` (with fast, reliable "domcontentloaded" default)
 - `p.text(selector)`
 - `p.textAll(selector)`
@@ -144,7 +148,8 @@ Approved pass-through wrappers (may not need?):
 - `p.waitForSelector(selector)` (generally not necessary since actions auto-wait)
 - `p.setContent(html)` // TODO use "domcontentloaded"
 - `p.page` escape hatch to access the underlying Puppeteer page API if necessary (if you're doing this often, don't use Puppe)
-`p.byText("Target text').click()`
+
+- `p.byText("Target text').click()`
 
 - `p.scrapeSchema(selector, {childSelectorSchema})`?
   (discouraged--it's best to use Puppeteer without Puppe if you need to do this often)
@@ -238,7 +243,7 @@ const el = await page.waitForSelector(selector);
 await el.click();
 ```
 
-has a pitfall: `el` can be removed from the document in the split second prior to clicking it. A more reliable approach would move both calls into a single `evaluate`.
+has a pitfall: the element handle `el` points to can be removed from the document in the split second prior to clicking it. A more reliable approach would move both calls into a single `evaluate`.
 
 But at the present time, Puppeteer doesn't offer anything comparable to Playwright's locator API, which was designed from the ground-up to eliminate separate calls for locating and acting. Puppeteer's locator API is experimental and seems to miss most of the good parts of the Playwright locator API, so I avoid it.
 
@@ -272,24 +277,26 @@ If you want a more verbose name, I suggest using `pup` rather than `page` to avo
 - If you do click to trigger a navigation, avoid using a network idle. Instead, wait for a specific predicate (selector, response, request, etc) on the destination page. Navigation click race conditions are a classic source of slowness and unreliability in Puppeteer, so they're not exposed in Puppe.
 - For scraping information in a container, say a list of card elements, select the card containers and use `evalAll` to extract data from each one:
 
-   ```js
-   // TODO could provide puppe.text(sel) in browser
-   p.$(containerClass).evalAll(el => ({
-     title: el.querySelector("h3").textContent().trim(),
-     price: el.querySelector('[data-testid="price"]').textContent.trim(),
-     // ...
-   }));`
-   ```
+  ```js
+  // TODO could provide puppe.text(sel) in browser
+  p.$(containerClass).evalAll(el => ({
+    title: el.querySelector("h3").textContent().trim(),
+    price: el.querySelector('[data-testid="price"]').textContent.trim(),
+    // ...
+  }));`
+  ```
+
 - For scraping a table, `evalAll` on the table rows:
 
-   ```js
-   p.$(table tr).evalAll(el => el.querySelector("td").textContent.trim());
-     price: el.querySelector('[data-testid="price"]').textContent.trim(),
-     // ...
-   }));`
-   ```
+  ```js
+  p.$(table tr).evalAll(el => el.querySelector("td").textContent.trim());
+    price: el.querySelector('[data-testid="price"]').textContent.trim(),
+    // ...
+  }));`
+  ```
 
 Avoid "parallel arrays" scraping, like grabbing all titles and all links separately, then zipping them together afterwards.
+
 - Generally avoid using third-party libraries with Puppe. If you want to dump the HTML into Cheerio and aren't interested in manipulating the live page, Puppe can still be somewhat handy because of its sensible loading defaults and resource blocks, but it's not the intended use case.
 - Prefer using fetch and Cheerio for static pages, unless the site blocks your requests.
 
@@ -300,6 +307,10 @@ See my blog posts for more recommendations : TODO add. None of them are specific
 ## Prior art
 
 - ????
+
+## Contributions
+
+Feel free to open issues and PR contributions.
 
 ...
 
@@ -318,6 +329,7 @@ See my blog posts for more recommendations : TODO add. None of them are specific
 - ~~research adding as a puppeteer-extra plugin~~
 - wait for dialog promisified on("dialog")
 - tests
+- consider a command line API?
 
 - could move launch flags as argument to a new func that launches the browser
 
