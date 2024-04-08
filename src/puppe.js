@@ -25,13 +25,16 @@ const puppe = {
     this.page = page;
     await page.setUserAgent(opts.ua);
     await page.setJavaScriptEnabled(opts.js);
-    await page.setDefaultNavigationTimeout(opts.navigationTimeout);
+    await page.setDefaultNavigationTimeout(
+      opts.navigationTimeout
+    );
     await page.setDefaultTimeout(opts.timeout);
 
     if (opts.captureBrowserConsole) {
       const onPageConsole = msg =>
-        Promise.all(msg.args().map(e => e.jsonValue()))
-          .then(args => console.log(...args));
+        Promise.all(msg.args().map(e => e.jsonValue())).then(
+          args => console.log(...args)
+        );
       page.on("console", onPageConsole);
     }
 
@@ -66,7 +69,9 @@ const puppe = {
   },
 
   setContent(html) {
-    return this.page.setContent(html, {waitUntil: "domcontentloaded"});
+    return this.page.setContent(html, {
+      waitUntil: "domcontentloaded",
+    });
   },
 
   evaluate(callback) {
@@ -88,9 +93,9 @@ const puppe = {
 
   actions(selector, opts = {}) {
     const waitForSelector = () =>
-      !opts.wait
-      ? this.page.$(selector)
-      : this.page.waitForSelector(selector);
+      opts.wait === false
+        ? this.page.$(selector)
+        : this.page.waitForSelector(selector);
     const {opts: pageOpts, page} = this;
     return {
       // TODO return $-prefixed methods recursively to allow deep chaining?
@@ -100,7 +105,9 @@ const puppe = {
       },
       async clickAll() {
         await waitForSelector();
-        return page.$$eval(selector, els => els.map(e => e.click()));
+        return page.$$eval(selector, els =>
+          els.map(e => e.click())
+        );
       },
       async text() {
         const el = await waitForSelector();
@@ -109,17 +116,19 @@ const puppe = {
       },
       async textAll() {
         const el = await waitForSelector();
-        const text = await page.$$eval(
-          selector,
-          els => els.map(el => el.textContent)
+        const text = await page.$$eval(selector, els =>
+          els.map(el => el.textContent)
         );
-        return pageOpts.trimText ? text.map(e => e.trim()) : text;
+        return pageOpts.trimText
+          ? text.map(e => e.trim())
+          : text;
       },
       async eval(callback) {
         const el = await waitForSelector();
         return el.evaluate(callback);
       },
-      async evalAll(callback) { // TODO support string cb
+      async evalAll(callback) {
+        // TODO support string cb
         await waitForSelector();
         return page.$$eval(
           selector,
@@ -130,8 +139,7 @@ const puppe = {
       async attr(attribute) {
         const el = await waitForSelector();
         return el.evaluate(
-          (el, attribute) =>
-          el.getAttribute(attribute),
+          (el, attribute) => el.getAttribute(attribute),
           attribute
         );
       },
@@ -145,7 +153,9 @@ const puppe = {
       },
       async gotoHref() {
         const el = await waitForSelector();
-        const href = await el.evaluate(el => el.getAttribute("href"));
+        const href = await el.evaluate(el =>
+          el.getAttribute("href")
+        );
         return page.goto(href, {waitUntil: "domcontentloaded"});
       },
     };
