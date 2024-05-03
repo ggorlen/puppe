@@ -2,7 +2,7 @@
 
 Puppe is a wrapper on Puppeteer for lightweight web scraping tasks.
 
-Project status: WIP
+Project status: WIP, pre-alpha. Assume everything is unstable.
 
 ## Installation
 
@@ -17,13 +17,13 @@ npm i puppe
 ### Puppe:
 
 ```js
-const puppe = require("../src/puppe");
+import puppe from "../src/puppe";
 
 let p;
 (async () => {
   const url = "https://www.example.com/";
   p = await puppe.launch({
-    launchOptions: { headless: false },
+    launchOptions: {headless: false},
     js: false,
     block: {
       requests: req => req.url() !== url,
@@ -31,7 +31,9 @@ let p;
     },
   });
   await p.goto(url);
-  console.log(await p.$("h1").text());
+  console.log(await p.$text("Example Domain").text());
+
+  console.log(await p.text({text: "Example Domain"})); // maybe not a problem cuz we're never going to extract text if we already have text
 })()
   .catch(err => console.error(err))
   .finally(() => p?.close());
@@ -40,12 +42,12 @@ let p;
 ### Equivalent Puppeteeer:
 
 ```js
-const puppeteer = require("puppeteer");
+import puppeteer from "puppeteer";
 
 let browser;
 (async () => {
   const url = "https://www.example.com/";
-  browser = await puppeteer.launch({ headless: false });
+  browser = await puppeteer.launch({headless: false});
   const [page] = await browser.pages();
   await page.setJavaScriptEnabled(false);
   const ua =
@@ -63,11 +65,12 @@ let browser;
       req.continue();
     }
   });
-  await page.goto(url, { waitUntil: "domcontentloaded" });
-  const el = await page.waitForSelector("h1");
-  console.log(await el.evaluate((el) => el.textContent.trim()));
+  await page.goto(url, {waitUntil: "domcontentloaded"});
+  const selector = `::-p-xpath(//*[normalize-space()="Example Domain"])`;
+  const el = await page.waitForSelector(selector);
+  console.log(await el.evaluate(el => el.textContent.trim()));
 })()
-  .catch((err) => console.error(err))
+  .catch(err => console.error(err))
   .finally(() => browser?.close());
 ```
 
@@ -78,14 +81,16 @@ let browser;
 - Provides sensible, opinionated defaults tuned to web scraping:
   - Auto wait by default
   - Default "domcontentloaded" for speed
+  - Default untrusted clicks
   - Default human user agent for anti-detection
   - Single page per launch
   - Trim scraped text by default
+  - Selectors and actions for text
 - Easy configuration:
   - Easy to set a request blocker to speed up scrapes
   - Easy to disable JS
   - Avoid browser/page management
-- Removes footguns and unnecessary features:
+- Hides footguns and unnecessary features:
   - ElementHandles, which can become stale and are verbose to work with
   - Many network wait operations, which are slow and unreliable
   - Visibility-based trusted clicks, which are unreliable
@@ -103,31 +108,45 @@ The target audience for Puppe includes:
 
 All operations auto-wait with `page.waitForSelector()` by default.
 
-- `puppe.launch(options)`
-- `p.goto(url)`
-- `p.setContent(html)`
-- `p.evaluate(callback)`
-- `p.$(selector, {timeout: 10_000, wait: false}).click()`
-- `p.$(selector).click()`
-- `p.$(selector).clickAll()`
-- `p.$(selector).text()`
-- `p.$(selector).textAll()`
-- `p.$(selector).eval(callback)`
-- `p.$(selector).evalAll(callback)` // TODO pass vars to callback? another way to bind?
-- `p.$(selector).attr(attribute)`
-- `p.$(selector).attrAll(attribute)`
-- `p.$(selector).gotoHref()` // navigates to an element's href (?)
-- `p.$(selector).type(text)`
-- `p.$text(text).click()` // ... followed by any other action (ignore pre/post whitespace) (shorthand for `::-p-text('text')`)
-- `p.$containsText(text).clickAll()` 
-- `p.frame(frameSelector).$(selector).click()`
+- `puppe.launch(options)` - launches a browser and creates a page with Puppe options.
+- `p.goto(url)` - same as Puppeteer `goto`, but with `{waitUntil: "domcontentloaded"}` baked in.
+- `p.setContent(html)` - same as Puppeteer `setContent`, but with `{waitUntil: "domcontentloaded"}` baked in.
+- `p.evaluate(callback, ...args)` - same as Puppeteer `evaluate`.
+- `p.$(selector).click()` - auto-waits and uses an untrusted browser click
+- `p.$(selector).click({timeout: 10_000})` - auto-waits TODO
+- `p.$(selector).clickAll()` - auto-waits and uses untrusted browser clicks
+- `p.$(selector).text()` - auto-waits and returns text content for the first element matched // TODO should this use strict mode and fail if multiple matches? I think probably not
+- `p.$(selector).textAll()` - auto-waits and returns text content for multiple elements
+- `p.$(selector).eval(callback, ...args)` - auto-waits, then runs Puppeteer `$eval`
+- `p.$(selector).evalAll(callback, ...args)` - auto-waits and runs `callback` in the browser with `elements.map` already called
+- `p.$(selector).attr(attribute)` - auto-waits and returns `attribute` on first element found
+- `p.$(selector).attrAll(attribute)`- auto-waits and returns`attribute`s for all elements found // TODO is this needed?
+- `p.$(selector).gotoHref()` - auto-waits and navigates to an element's href with `{ waitUntil: "domcontentloaded" }` (is this needed?)
+- `p.$(selector).type(text)` - auto-waits and types `text` into the element using standard Puppeteer trusted typing (to fire event handlers).
+- `p.$(selector).waitFor()` - auto-waits, generally not necessary
+- `p.$text(text).someAction()` - auto-waits for element with exact (whitespace normalized) text (alternate: skip the `p.$text()` and use an arg on the action like `p.byText.click("foo")` or `p.click("foo", p.TEXT)` or `p.click({text: "foo"})` or `p.click({containsText: "foo"})` or `p.click("foo", {byText: true})` or `p.click({exactText: "foo"})`, maybe also `p.click({xpath: ""})` (or not).
+- `p.$containsText(text).someAction()` - auto-waits for element containing text
+- `p.$(selector).table()` - auto-waits and scrapes table (optionally with headers)
+- `p.$frame(frameSelector).$(selector).click()` // TODO
+- `p.$role("button", "text")` // TODO
+- `p.$fuzzyText("close enough text with levenstein?")` // TODO?
+- `p.$testId("foo")` // TODO but discouraged?
+- `p.$attr("foo", "bar")` // macro for `[foo=bar]`?
+
+escape hatch:
+
+- `p.page` - access the underlying Puppeteer page instance. If you're using this often, probably just use plain Puppeteer.
 
 Approved pass-through wrappers (may not need?):
 
-- `p.screenshot(opts)` // opts passed through to page.screenshot(); TODO p.$().screenshot()?
-- `p.content()` --> simple wrapper
+- `p.screenshot(opts)` // TODO p.$().screenshot()?
+- `p.content()` - discouraged if used to put content into a separate HTML parser
 
-//`p.restart()`/`p.configure()`//`relaunch()` (or just make it so `.launch()` relaunches the page on the same browser, if the browser is still open?)
+May not offer?
+
+- option to disable auto waits
+- `p.restart()`/`p.configure()`//`relaunch()` (or just make it so `.launch()` relaunches the page on the same browser, if the browser is still open?)
+- `puppe.on(page, options)` // discouraged/may not offer?
 
 // alternate API:
 
@@ -141,15 +160,16 @@ Approved pass-through wrappers (may not need?):
 - `p.$$eval(selector, browserCallback)`
 - `p.click(selector)` with an untrusted event to avoid visibility issues
 - `p.gotoHref(selector)` goes to an element's href, preferred over clicking
-- `p.type(selector, text)`
+- `p.type(selector, text)` // maybe fill()? TODO: inputs?
+- `p.wait(selector)` // maybe fill()? TODO: inputs?
+- `p.table(selector)`
+
 - `p.waitForFunction(predicate)`
 - `p.waitForRequest(predicate)`
 - `p.waitForResponse(predicate)`
 - `p.waitForSelector(selector)` (generally not necessary since actions auto-wait)
 - `p.setContent(html)` // TODO use "domcontentloaded"
-- `p.page` escape hatch to access the underlying Puppeteer page API if necessary (if you're doing this often, don't use Puppe)
-
-- `p.byText("Target text').click()`
+- `p.page` escape hatch to access the underlying Puppeteer page if necessary (if you're doing this often, probably don't use Puppe)
 
 - `p.scrapeSchema(selector, {childSelectorSchema})`?
   (discouraged--it's best to use Puppeteer without Puppe if you need to do this often)
@@ -263,7 +283,7 @@ I like the idea of a simple scraping-oriented DSL in theory, but that'd be a dif
 
 ### How do I sleep/wait?
 
-Generally, don't, unless you're debugging. In that case, use an option [here](). TODO add. There's no need for a scraping library to offer sleeps, which is why sleeps were removed from Puppeteer.
+Generally, don't, unless you're debugging. In that case, use an option [here](). TODO add rationale. There's no need for a scraping library to offer sleeps, which is why sleeps were removed from Puppeteer.
 
 ### What is the `p` object returned by `puppe.launch()`?
 
@@ -312,9 +332,21 @@ See my blog posts for more recommendations : TODO add. None of them are specific
 
 Feel free to open issues and PR contributions.
 
-...
+## Development
 
-## TODO (somewhat outdated; will remove soon)
+```
+git clone https://github.com/ggorlen/puppe.git
+cd puppe
+npm i
+npm test
+npm run test-types
+npm run lint
+npm run format
+```
+
+---
+
+## TODO (somewhat outdated; remove soon after grabbing what's needed)
 
 - add [`navClick`](https://stackoverflow.com/a/77090983/6243352)
 - add `waitForConsoleLog`: https://stackoverflow.com/a/74953115/6243352
@@ -326,11 +358,8 @@ Feel free to open issues and PR contributions.
 - polling/retries (not sure what I meant when I wrote this)
 - wait for selector in arbitrarily nested iframes or shadow doms
 - flag to wait for all
-- ~~research adding as a puppeteer-extra plugin~~
+- research adding as a puppeteer-extra plugin
 - wait for dialog promisified on("dialog")
 - tests
 - consider a command line API?
-
 - could move launch flags as argument to a new func that launches the browser
-
-Consider implementing a sane subset of Playwright, with auto waiting (`$eval`, `$$eval`, etc with auto wait), or only exposing page via a property rather than a proxy.

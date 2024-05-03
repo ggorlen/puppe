@@ -1,10 +1,10 @@
-const puppe = require("../src/puppe");
+import puppe from "../src/puppe.js";
 
 let p;
 (async () => {
   const url = "https://www.example.com/";
   p = await puppe.launch({
-    launchOptions: { headless: true },
+    launchOptions: {headless: false},
     js: false,
     block: {
       requests: req => req.url() !== url,
@@ -12,7 +12,7 @@ let p;
     },
   });
   await p.goto(url);
-  console.log(await p.$("h1").text());
+  console.log(await p.$text("Example Domain").text());
 })()
   .catch(err => console.error(err))
   .finally(() => p?.close());
