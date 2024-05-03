@@ -1,10 +1,10 @@
-const puppe = require("../src/puppe");
+import puppe from "../src/puppe.js";
 
 let p;
 (async () => {
   const url = "https://www.example.com/";
   p = await puppe.launch({
-    ua: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36",
+    ua: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
     js: true,
     defaultTimeout: 15_000,
     block: {

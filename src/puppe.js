@@ -1,9 +1,16 @@
-const puppeteer = require("puppeteer");
+import puppeteer from "puppeteer";
 
-const puppe = {
+/**
+ * @typedef {import("puppeteer").Page} Page
+ * @typedef {import("puppeteer").Browser} Browser
+ * @typedef {import("puppeteer").ElementHandle} ElementHandle
+ */
+
+// TODO handle relaunch?
+class Puppe {
   async launch(opts) {
     const ua =
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36";
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36";
     const defaults = Object.freeze({
       launchOptions: {},
       ua,
@@ -13,7 +20,7 @@ const puppe = {
       captureBrowserConsole: false,
       trimText: true,
       block: {
-        requests: req => true,
+        requests: req => false,
         resources: [],
       },
       // TODO allow: (overrides block)
@@ -21,6 +28,8 @@ const puppe = {
     });
     this.opts = opts = {...defaults, ...opts};
     this.browser = await puppeteer.launch(opts.launchOptions);
+
+    /** @type {Page} */
     const [page] = await this.browser.pages();
     this.page = page;
     await page.setUserAgent(opts.ua);
@@ -40,7 +49,6 @@ const puppe = {
 
     if (opts.block.requests || !opts.block.resources?.length) {
       await page.setRequestInterception(true);
-      const blockedResources = ["stylesheet", "image"];
       page.on("request", req => {
         if (
           (opts.block.requests && opts.block.requests(req)) ||
@@ -54,47 +62,60 @@ const puppe = {
     }
 
     return this;
-  },
+  }
 
   page() {
     return this.page;
-  },
+  }
 
   close() {
     return this.browser?.close();
-  },
+  }
 
+  /**
+   * Same as page.goto but with waitUntil: "domcontentloaded".
+   * @param {string} url - the URL to navigate to.
+   * @return {Promise<Response>}
+   */
   goto(url) {
     return this.page.goto(url, {waitUntil: "domcontentloaded"});
-  },
+  }
 
   setContent(html) {
     return this.page.setContent(html, {
       waitUntil: "domcontentloaded",
     });
-  },
+  }
 
-  evaluate(callback) {
-    return this.page.evaluate(callback);
-  },
+  title(...args) {
+    return this.page.title(...args);
+  }
+
+  content() {
+    return this.page.content();
+  }
+
+  evaluate(...args) {
+    return this.page.evaluate(...args);
+  }
 
   $text(text, opts) {
     const selector = `::-p-xpath(//*[normalize-space()="${text}"])`;
     return this.actions(selector, opts);
-  },
+  }
 
   $containsText(text, opts) {
     return this.actions(`::-p-text("${text}")`, opts);
-  },
+  }
 
   $(selector, opts) {
     return this.actions(selector, opts);
-  },
+  }
 
   actions(selector, opts = {}) {
     const waitForSelector = () =>
       opts.wait === false
-        ? this.page.$(selector)
+        ? this.page.$(selector) // TODO improve error if this returns null
         : this.page.waitForSelector(selector);
     const {opts: pageOpts, page} = this;
     return {
@@ -127,13 +148,17 @@ const puppe = {
         const el = await waitForSelector();
         return el.evaluate(callback);
       },
-      async evalAll(callback) {
-        // TODO support string cb
+      async evalAll(mapFn, ...args) {
         await waitForSelector();
         return page.$$eval(
           selector,
-          els => els.map(callback),
-          callback
+          (els, mapFn, ...args) =>
+            els.map((el, i) => {
+              const fn = new Function(`return ${mapFn}`)();
+              return fn(el, i, ...args);
+            }),
+          mapFn.toString(),
+          ...args
         );
       },
       async attr(attribute) {
@@ -143,12 +168,13 @@ const puppe = {
           attribute
         );
       },
-      async attrAll(callback) {
+      async attrAll(attribute) {
         await waitForSelector();
         return page.$$eval(
           selector,
-          els => els.map(callback),
-          callback
+          (els, attribute) =>
+            els.map(el => el.getAttribute(attribute)),
+          attribute
         );
       },
       async gotoHref() {
@@ -158,8 +184,42 @@ const puppe = {
         );
         return page.goto(href, {waitUntil: "domcontentloaded"});
       },
+      async table() {
+        // TODO option to handle headers
+        await waitForSelector();
+        return page.$$eval(selector + " tr", els =>
+          els.map(el =>
+            [...el.querySelectorAll("td, th")].map(
+              el => el.textContent
+            )
+          )
+        );
+      },
+
+      // approved pass-throughs
+      screenshot(...args) {
+        return page.screenshot(...args);
+      },
+      content(...args) {
+        return page.content(...args);
+      },
+      waitForFunction(...args) {
+        return page.waitForFunction(...args);
+      },
+      waitForRequest(...args) {
+        return page.waitForRequest(...args);
+      },
+      waitForResponse(...args) {
+        return page.waitForResponse(...args);
+      },
     };
+  }
+}
+
+const puppe = {
+  launch(...args) {
+    return new Puppe().launch(...args);
   },
 };
 
-module.exports = puppe;
+export default puppe;
