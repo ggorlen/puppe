@@ -17,7 +17,7 @@ npm i puppe
 ### Puppe:
 
 ```js
-import puppe from "../src/puppe";
+import puppe from "puppe";
 
 let p;
 (async () => {
@@ -32,8 +32,6 @@ let p;
   });
   await p.goto(url);
   console.log(await p.$text("Example Domain").text());
-
-  console.log(await p.text({text: "Example Domain"})); // maybe not a problem cuz we're never going to extract text if we already have text
 })()
   .catch(err => console.error(err))
   .finally(() => p?.close());
@@ -106,7 +104,7 @@ The target audience for Puppe includes:
 
 ## API
 
-All operations auto-wait with `page.waitForSelector()` by default.
+All operations auto-wait with `page.waitForSelector()` by default. A design goal is to be unsurprising for users of Playwright and Puppeteer APIs.
 
 - `puppe.launch(options)` - launches a browser and creates a page with Puppe options.
 - `p.goto(url)` - same as Puppeteer `goto`, but with `{waitUntil: "domcontentloaded"}` baked in.
@@ -120,18 +118,18 @@ All operations auto-wait with `page.waitForSelector()` by default.
 - `p.$(selector).eval(callback, ...args)` - auto-waits, then runs Puppeteer `$eval`
 - `p.$(selector).evalAll(callback, ...args)` - auto-waits and runs `callback` in the browser with `elements.map` already called
 - `p.$(selector).attr(attribute)` - auto-waits and returns `attribute` on first element found
-- `p.$(selector).attrAll(attribute)`- auto-waits and returns`attribute`s for all elements found // TODO is this needed?
-- `p.$(selector).gotoHref()` - auto-waits and navigates to an element's href with `{ waitUntil: "domcontentloaded" }` (is this needed?)
+- `p.$(selector).attrAll(attribute)`- auto-waits and returns `attribute`s for all elements found
+- `p.$(selector).gotoHref()` - auto-waits and navigates to an element's href with `{ waitUntil: "domcontentloaded" }`
 - `p.$(selector).type(text)` - auto-waits and types `text` into the element using standard Puppeteer trusted typing (to fire event handlers).
-- `p.$(selector).waitFor()` - auto-waits, generally not necessary
+- `p.$(selector).waitFor()` - auto-waits, generally not necessary // TODO skip?
+- `p.$role("button", "Subscribe")` - auto-waits, selects by aria role and aria name
 - `p.$text(text).someAction()` - auto-waits for element with exact (whitespace normalized) text (alternate: skip the `p.$text()` and use an arg on the action like `p.byText.click("foo")` or `p.click("foo", p.TEXT)` or `p.click({text: "foo"})` or `p.click({containsText: "foo"})` or `p.click("foo", {byText: true})` or `p.click({exactText: "foo"})`, maybe also `p.click({xpath: ""})` (or not).
 - `p.$containsText(text).someAction()` - auto-waits for element containing text
 - `p.$(selector).table()` - auto-waits and scrapes table (optionally with headers)
 - `p.$frame(frameSelector).$(selector).click()` // TODO
-- `p.$role("button", "text")` // TODO
-- `p.$fuzzyText("close enough text with levenstein?")` // TODO?
+- `p.$fuzzyText("close enough text with levenstein?")` // TODO probably unnecessary?
 - `p.$testId("foo")` // TODO but discouraged?
-- `p.$attr("foo", "bar")` // macro for `[foo=bar]`?
+- `p.$(selector).schema({title: text(".foo a"), src("img")})`- auto-waits and scrapes elements by schema // TODO dunno seems to overengineered?
 
 escape hatch:
 
@@ -148,7 +146,7 @@ May not offer?
 - `p.restart()`/`p.configure()`//`relaunch()` (or just make it so `.launch()` relaunches the page on the same browser, if the browser is still open?)
 - `puppe.on(page, options)` // discouraged/may not offer?
 
-// alternate API:
+// alternate API (scrapped for this project, but might be worth implementing elsewhere):
 
 - `p.goto(url)` (with fast, reliable "domcontentloaded" default)
 - `p.text(selector)`
@@ -191,6 +189,10 @@ If there's a certain feature you think would fit well with the Puppe design phil
 ### Is Puppe designed for testing?
 
 No. Use Playwright for testing.
+
+### Is Puppe designed for making PDFs?
+
+No. Use Puppeteer for making PDFs.
 
 ### What's the point of this library when Playwright's locators have solved flakiness?
 
@@ -348,6 +350,12 @@ npm run format
 
 ## TODO (somewhat outdated; remove soon after grabbing what's needed)
 
+- Add solutions to http://www.uitestingplayground.com/ to examples
+  - https://the-internet.herokuapp.com/
+- prohibit timeout: 0 or raise warning if too long?
+- maybe have it so you can pass playwright in after all, so it's more compatible with future puppeteer versions and doesn't have the dependency so much?
+- autogenerate docs from jsdoc
+- add type generation d.ts
 - add [`navClick`](https://stackoverflow.com/a/77090983/6243352)
 - add `waitForConsoleLog`: https://stackoverflow.com/a/74953115/6243352
 - screenshot?

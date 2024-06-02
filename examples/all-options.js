@@ -8,6 +8,10 @@ let p;
     js: true,
     defaultTimeout: 15_000,
     block: {
+      /**
+       *
+       * @param req
+       */
       requests: req => req.url() !== url,
       resources: ["stylesheet", "script"],
     },
