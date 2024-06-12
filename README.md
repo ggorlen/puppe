@@ -350,10 +350,19 @@ npm run format
 
 ## TODO (somewhat outdated; remove soon after grabbing what's needed)
 
-- Add solutions to http://www.uitestingplayground.com/ to examples
-  - https://the-internet.herokuapp.com/
+- can add $$evalMap: https://stackoverflow.com/a/78414959/6243352 (don't forget to add args)
+- Add solutions to playground tests:
+  - http://www.uitestingplayground.com
+  - https://demoqa.com/
+  - https://the-internet.herokuapp.com
+  - https://magento.softwaretestingboard.com/vulcan-weightlifting-tank.html#review-form
+  - https://web.archive.org/web/20211029183018/https://practice.automationbro.com/contact/ and https://stackoverflow.com/a/75778266/6243352
+- useful resource for puppe to specify package.json types: https://unpkg.com/browse/vue@3.4.21/package.json
 - prohibit timeout: 0 or raise warning if too long?
 - maybe have it so you can pass playwright in after all, so it's more compatible with future puppeteer versions and doesn't have the dependency so much?
+- add frame handling to puppe: https://stackoverflow.com/questions/59431296/trying-to-click-a-button-within-an-iframe-with-puppeteer
+- Puppe may need navClick if the selectors are all the same on the other page? or use goto?: https://stackoverflow.com/questions/77090738/puppeteer-cannot-target-checkbox-on-hotel-website/77090983#77090983
+- puppe isolate element for screenshot `p.$("...").screenshot()`
 - autogenerate docs from jsdoc
 - add type generation d.ts
 - add [`navClick`](https://stackoverflow.com/a/77090983/6243352)

@@ -192,7 +192,9 @@ class Puppe {
       const el = await this.page.$(selector);
 
       if (!el) {
-        throw Error(`Unable to find element matching selector '${selector}'`);
+        throw Error(
+          `Unable to find element matching selector '${selector}'`
+        );
       }
 
       return el;
@@ -297,7 +299,9 @@ class Puppe {
         );
 
         if (!href) {
-          throw Error("No href attribute is available on element");
+          throw Error(
+            "No href attribute is available on element"
+          );
         }
 
         return page.goto(href, {waitUntil: "domcontentloaded"});
