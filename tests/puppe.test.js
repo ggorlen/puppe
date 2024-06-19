@@ -1,12 +1,14 @@
+import puppeteer from "puppeteer";
 import puppe from "../src/puppe";
 
 /**
  * Testing utility function that wraps HTML with a timeout
  * to add it to the document after a delay.
+ *
  * @param {string} html - the HTML to inject into the page after a timeout.
  * Should be quoted so that the final string is syntactically valid.
- * @param {number} ms - the timeout delay.
- * @returns {string} the timeout HTML.
+ * @param {number} ms - the timeout delay to add the element after.
+ * @returns {string} the HTML with the element added after the timeout.
  */
 const timeout = (html, ms = 10) =>
   `<!DOCTYPE html><html lang="en"><body><script>
@@ -17,7 +19,7 @@ const timeout = (html, ms = 10) =>
 
 let p;
 beforeEach(async () => {
-  p = await puppe.launch({launchOptions: {headless: true}});
+  p = await puppe.launch({launchOptions: {headless: true}, timeout: 2_000});
 });
 afterEach(() => p.close());
 
@@ -103,7 +105,9 @@ describe("selectors", () => {
 
   describe("$role", () => {
     it("should wait and find an element by Aria role and name", async () => {
-      const html = timeout("'<h1>foo</h1>'");
+      // 10ms sometimes hangs due to what seems like a Pupp bug, so use 50ms
+      // https://github.com/puppeteer/puppeteer/issues/12625
+      const html = timeout("'<h1>foo</h1>'", 50);
       await p.setContent(html);
       expect(await p.$role("heading", "foo").text()).toBe("foo");
     });

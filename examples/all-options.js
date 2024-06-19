@@ -6,7 +6,7 @@ let p;
   p = await puppe.launch({
     ua: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
     js: true,
-    defaultTimeout: 15_000,
+    timeout: 15_000,
     block: {
       /**
        *
