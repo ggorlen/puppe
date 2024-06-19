@@ -49,7 +49,7 @@ let browser;
   const [page] = await browser.pages();
   await page.setJavaScriptEnabled(false);
   const ua =
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36";
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36";
   await page.setUserAgent(ua);
   await page.setRequestInterception(true);
   const blockedResources = ["stylesheet", "image"];
@@ -90,8 +90,8 @@ let browser;
   - Avoid browser/page management
 - Hides footguns and unnecessary features:
   - ElementHandles, which can become stale and are verbose to work with
-  - Many network wait operations, which are slow and unreliable
-  - Visibility-based trusted clicks, which are unreliable
+  - Easily-misused network wait operations (`"load"`, `"networkidle0"`, etc), which are slow and unreliable
+  - Visibility-driven trusted clicks, which are unreliable
 - Stable, consistent API (Puppeteer has a lot of deprecated features making it confusing to find up-to-date information)
 - No dependencies other than Puppeteer
 
@@ -104,7 +104,9 @@ The target audience for Puppe includes:
 
 ## API
 
-All operations auto-wait with `page.waitForSelector()` by default. A design goal is to be unsurprising for users of Playwright and Puppeteer APIs.
+All operations auto-wait with `page.waitForSelector()` by default.
+
+A design goal is to be unsurprising for users of Playwright and Puppeteer APIs.
 
 - `puppe.launch(options)` - launches a browser and creates a page with Puppe options.
 - `p.goto(url)` - same as Puppeteer `goto`, but with `{waitUntil: "domcontentloaded"}` baked in.
@@ -364,7 +366,7 @@ npm run format
 - Puppe may need navClick if the selectors are all the same on the other page? or use goto?: https://stackoverflow.com/questions/77090738/puppeteer-cannot-target-checkbox-on-hotel-website/77090983#77090983
 - puppe isolate element for screenshot `p.$("...").screenshot()`
 - autogenerate docs from jsdoc
-- add type generation d.ts
+- add type generation d.ts https://www.typescriptlang.org/docs/handbook/declaration-files/dts-from-js.html
 - add [`navClick`](https://stackoverflow.com/a/77090983/6243352)
 - add `waitForConsoleLog`: https://stackoverflow.com/a/74953115/6243352
 - screenshot?

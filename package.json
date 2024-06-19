@@ -21,9 +21,10 @@
   "author": "ggorlen",
   "license": "ISC",
   "dependencies": {
-    "puppeteer": "^22.11.0"
+    "puppeteer": "^22.11.2"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.12",
     "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jsdoc": "^48.2.3",

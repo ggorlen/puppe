@@ -15,8 +15,13 @@
     "target": "ES2016",
     "module": "ESNext",
     "moduleResolution": "node",
-    "outDir": "dist"
+    "outDir": "dist",
+    "types": ["jest"]
   },
-  "include": ["./src/**/*.js"],
+  "include": [
+    "./src/**/*.js",
+    "./teXXXsts/**/*.js",
+    "./examples/*.js"
+  ],
   "verbose": true
 }
