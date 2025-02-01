@@ -353,7 +353,9 @@ npm run format
 ## TODO (somewhat outdated; remove soon after grabbing what's needed)
 
 - can add $$evalMap: https://stackoverflow.com/a/78414959/6243352 (don't forget to add args)
+- Can add `waitForUrl()` [here](https://stackoverflow.com/questions/58451066/puppeteer-wait-for-url/69891137#69891137)
 - Add solutions to playground tests:
+  - https://www.saucedemo.com/
   - http://www.uitestingplayground.com
   - https://practicesoftwaretesting.com
   - https://demoqa.com/
@@ -362,15 +364,23 @@ npm run format
   - https://scrapfly.io/scrapeground
   - https://ecommerce-playground.lambdatest.io/
   - https://testing-playground.com/
+  - https://testpages.herokuapp.com/styled/alerts/alert-test.html
   - https://the-internet.herokuapp.com
   - https://magento.softwaretestingboard.com/vulcan-weightlifting-tank.html#review-form
+  - https://qaplayground.dev/
   - https://web.archive.org/web/20211029183018/https://practice.automationbro.com/contact/ and https://stackoverflow.com/a/75778266/6243352
   - http://books.toscrape.com
   - https://www.scrapethissite.com/pages/ajax-javascript/#2015
   - https://automationpanda.com/2021/12/29/want-to-practice-test-automation-try-these-demo-sites/
   - https://ultimateqa.com/dummy-automation-websites/
   - https://automationpanda.com/2021/12/29/want-to-practice-test-automation-try-these-demo-sites/
+  - http://autopract.com/selenium/tooltip/
+  - https://ps.uci.edu/~franklin/doc/file_upload.html
+  - https://automationnest.com/challenges
+  - https://automationintesting.online/
+  - https://iframetester.com/
 - useful resource for puppe to specify package.json types: https://unpkg.com/browse/vue@3.4.21/package.json
+- web scraping/userscript problem: needing to change input value with untrusted event in the browser: https://stackoverflow.com/questions/77113951/javascript-cannot-set-value-of-input-text-form-field
 - prohibit timeout: 0 or raise warning if too long?
 - maybe have it so you can pass playwright in after all, so it's more compatible with future puppeteer versions and doesn't have the dependency so much?
 - add frame handling to puppe: https://stackoverflow.com/questions/59431296/trying-to-click-a-button-within-an-iframe-with-puppeteer
