@@ -370,6 +370,7 @@ npm run format
   - https://qaplayground.dev/
   - https://web.archive.org/web/20211029183018/https://practice.automationbro.com/contact/ and https://stackoverflow.com/a/75778266/6243352
   - http://books.toscrape.com
+  - https://automationexercise.com/ 
   - https://www.scrapethissite.com/pages/ajax-javascript/#2015
   - https://automationpanda.com/2021/12/29/want-to-practice-test-automation-try-these-demo-sites/
   - https://ultimateqa.com/dummy-automation-websites/
