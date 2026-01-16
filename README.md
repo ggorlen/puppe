@@ -364,6 +364,7 @@ npm run format
   - https://scrapfly.io/scrapeground
   - https://ecommerce-playground.lambdatest.io/
   - https://testing-playground.com/
+  - https://automationteststore.com/
   - https://testpages.herokuapp.com/styled/alerts/alert-test.html
   - https://the-internet.herokuapp.com
   - https://magento.softwaretestingboard.com/vulcan-weightlifting-tank.html#review-form
