@@ -371,6 +371,7 @@ npm run format
   - https://qaplayground.dev/
   - https://web.archive.org/web/20211029183018/https://practice.automationbro.com/contact/ and https://stackoverflow.com/a/75778266/6243352
   - http://books.toscrape.com
+  - https://automationexercise.com/ 
   - https://www.scrapethissite.com/pages/ajax-javascript/#2015
   - https://automationpanda.com/2021/12/29/want-to-practice-test-automation-try-these-demo-sites/
   - https://ultimateqa.com/dummy-automation-websites/
@@ -380,6 +381,12 @@ npm run format
   - https://automationnest.com/challenges
   - https://automationintesting.online/
   - https://iframetester.com/
+  - https://demo.playwright.dev/todomvc/
+  - https://demoblaze.com/
+  - https://danube-web.shop/
+  - https://3x.ant.design/components/date-picker/
+  - https://ui.vision/demo/webtest/frames/
+  - https://demo.automationtesting.in/
 - useful resource for puppe to specify package.json types: https://unpkg.com/browse/vue@3.4.21/package.json
 - web scraping/userscript problem: needing to change input value with untrusted event in the browser: https://stackoverflow.com/questions/77113951/javascript-cannot-set-value-of-input-text-form-field
 - prohibit timeout: 0 or raise warning if too long?
